@@ -1,0 +1,27 @@
+name: Publish to PowerShell Gallery
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v2
+
+      - name: Publish module to PowerShell Gallery
+        shell: pwsh
+        run: |
+          $modulePath = "$PWD"
+          Write-Host "Publishing from path: $modulePath"
+
+          Publish-Module -Path $modulePath `
+                         -NuGetApiKey "${{ secrets.NUGET_API_KEY }}" `
+                         -Verbose
