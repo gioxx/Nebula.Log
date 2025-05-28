@@ -25,19 +25,25 @@ jobs:
       - name: Prepare module package
         shell: pwsh
         run: |
-          $outDir = "$PWD\build"
+          $outDir = Join-Path $PWD 'build'
+          $moduleName = 'Nebula.Log'
+          $moduleDir = Join-Path $outDir $moduleName
+
           if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
-          New-Item -ItemType Directory -Path $outDir | Out-Null
-      
-          $includeFiles = @('*.psd1', '*.psm1', 'README.md', 'icon.png')
-          foreach ($pattern in $includeFiles) {
-              Get-ChildItem -Path $PWD -Filter $pattern -File | Copy-Item -Destination $outDir -Force
+          New-Item -ItemType Directory -Path $moduleDir -Force | Out-Null
+
+          # Copy only the needed files
+          $includeFiles = @("$moduleName.psd1", "$moduleName.psm1", "README.md", "icon.png")
+          foreach ($file in $includeFiles) {
+            if (Test-Path $file) {
+              Copy-Item -Path $file -Destination $moduleDir -Force
+            }
           }
 
       - name: Publish module to PowerShell Gallery
         shell: pwsh
         run: |
-          $modulePath = "$PWD\build"
+          $modulePath = Join-Path $PWD 'build' | Join-Path -ChildPath 'Nebula.Log'
 
           if (-not (Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue)) {
               Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -InstallationPolicy Trusted
