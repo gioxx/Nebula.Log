@@ -18,11 +18,12 @@
 
     PrivateData = @{
         PSData = @{
-            Tags         = @('Logging', 'PowerShell', 'Nebula', 'Utilities')
-            LicenseUri   = 'https://opensource.org/licenses/MIT'
-            ProjectUri   = 'https://github.com/gioxx/Nebula.Log'
-            IconUri      = 'https://raw.githubusercontent.com/gioxx/Nebula.Log/main/icon.png'
-            ReleaseNotes = @'
+            Tags            = @('Logging', 'PowerShell', 'Nebula', 'Utilities')
+            License         = 'MIT'
+            ProjectUri      = 'https://github.com/gioxx/Nebula.Log'
+            Icon            = 'icon.png'
+            Readme          = 'README.md'
+            ReleaseNotes    = @'
 Initial release of Nebula.Log:
 - Write-Log function with support for INFO, SUCCESS, WARNING, DEBUG, ERROR
 - Automatic log file archiving if it exceeds 512KB
