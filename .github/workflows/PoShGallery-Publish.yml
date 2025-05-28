@@ -19,10 +19,20 @@ jobs:
           $psd1Path = Join-Path $PWD 'Nebula.Log.psd1'
           Test-ModuleManifest -Path $psd1Path -Verbose
 
+      - name: Prepare module package
+        shell: pwsh
+        run: |
+          $outDir = "$PWD\build"
+          if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
+          New-Item -ItemType Directory -Path $outDir | Out-Null
+      
+          Get-ChildItem -Path $PWD -Include *.psd1,*.psm1,README.md,icon.png -File |
+              Copy-Item -Destination $outDir
+
       - name: Publish module to PowerShell Gallery
         shell: pwsh
         run: |
-          $modulePath = "$PWD"
+          $modulePath = "$PWD\build"
 
           if (-not (Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue)) {
               Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -InstallationPolicy Trusted
