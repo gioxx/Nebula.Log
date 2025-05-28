@@ -106,7 +106,10 @@ function Test-ActivityLog {
         } catch {
             return "KO"
         }
-    }    
+    } else {
+        Write-Error "Log file does not exist: $logFilePath"
+        return "KO"
+    }
 }
 
 Set-Alias -Name Log-Message -Value Write-Log
