@@ -29,8 +29,10 @@ jobs:
           if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
           New-Item -ItemType Directory -Path $outDir | Out-Null
       
-          Get-ChildItem -Path $PWD -Include *.psd1,*.psm1,README.md,icon.png -File |
-              Copy-Item -Destination $outDir
+          $includeFiles = @('*.psd1', '*.psm1', 'README.md', 'icon.png')
+          foreach ($pattern in $includeFiles) {
+              Get-ChildItem -Path $PWD -Filter $pattern -File | Copy-Item -Destination $outDir -Force
+          }
 
       - name: Publish module to PowerShell Gallery
         shell: pwsh
