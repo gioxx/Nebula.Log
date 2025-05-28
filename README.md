@@ -50,6 +50,23 @@ Invoke-Pester -Script .\Nebula.Log.Tests.ps1
 
 ---
 
+## 🧽 How to clean up old module versions (optional)
+
+When updating from previous versions, old files (such as unused `.psm1`, `.yml`, or `LICENSE` files) are not automatically deleted.  
+If you want a completely clean setup, you can remove all previous versions manually:
+
+```powershell
+# Remove all installed versions of the module
+Uninstall-Module -Name Nebula.Log -AllVersions -Force
+
+# Reinstall the latest clean version
+Install-Module -Name Nebula.Log -Scope CurrentUser -Force
+```
+
+ℹ️ This is entirely optional — PowerShell always uses the most recent version installed.
+
+---
+
 ## 🔧 Development
 
 This module is part of the [Nebula](https://github.com/gioxx?tab=repositories&q=Nebula) PowerShell tools family.
