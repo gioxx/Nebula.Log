@@ -102,10 +102,10 @@ function Test-ActivityLog {
     if (Test-Path $logFilePath) {
         try {
             Log-Message -LogLocation $LogLocation -Message "Test activity log message." -Level "INFO" -WriteToFile
-            exit 0
+            return "OK"
         } catch {
             Write-Error "Failed to write test activity log message: $_"
-            exit 1
+            return "KO"
         }
     }    
 }
