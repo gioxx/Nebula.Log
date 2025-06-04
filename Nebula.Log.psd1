@@ -1,6 +1,6 @@
 @{
     RootModule        = 'Nebula.Log.psm1'
-    ModuleVersion     = '1.0.3'
+    ModuleVersion     = '1.0.4'
     GUID              = '4777f87e-f3fd-4404-bc3a-c724e6c12552'
     Author            = 'Giovanni Solone'
     Description       = 'Structured logging module for PowerShell scripts. Supports multiple log levels and file rotation.'
@@ -24,11 +24,7 @@
             Icon            = 'icon.png'
             Readme          = 'README.md'
             ReleaseNotes    = @'
-Initial release of Nebula.Log:
-- Write-Log function with support for INFO, SUCCESS, WARNING, DEBUG, ERROR
-- Automatic log file archiving if it exceeds 512KB
-- Alias Log-Message for compatibility
-- Test-ActivityLog to validate logging setup
+- Fixed issue with Test-ActivityLog function not writing to the log file.
 '@
         }
     }

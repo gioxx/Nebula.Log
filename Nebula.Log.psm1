@@ -94,16 +94,22 @@ function Test-ActivityLog {
     # Verify that the path exists
     if (-not (Test-Path $LogLocation)) {
         Write-Error "Log location does not exist: $LogLocation"
-        return
+        return "KO"
     }
 
     $logFilePath = Join-Path $LogLocation $LogFileName
 
     if (Test-Path $logFilePath) {
         try {
-            Log-Message -LogLocation $LogLocation -LogFileName $LogFileName -Message "Test activity log message." -Level "INFO" -WriteToFile
+            # Attempt to write a test message to the log file
+            Log-Message -LogLocation $LogLocation -LogFileName $LogFileName `
+                -Message "Test activity log message." -Level "INFO" `
+                -WriteToFile -ErrorAction Stop
             return "OK"
-        } catch {
+        }
+        catch {
+            # Catch any error, including access denied
+            Write-Error "Failed to write to activity log: $_"
             return "KO"
         }
     } else {
