@@ -42,6 +42,40 @@ Test-ActivityLog -LogLocation "C:\Logs"
 
 ---
 
+### 🔍 `Test-ActivityLog` in detail
+
+This function validates the availability and write capability of a specified activity log file.
+
+#### **Syntax**
+
+```powershell
+Test-ActivityLog -LogLocation <String> [-LogFileName <String>]
+```
+
+#### **Parameters**
+
+- `LogLocation` (String, **Required**)  
+  The directory where the log file is expected to be located.
+
+- `LogFileName` (String, Optional)  
+  The name of the log file. Defaults to `activity.log` if not specified.
+
+#### **Description**
+
+`Test-ActivityLog` checks whether the specified log file exists and is writable by the current user. If the file doesn't exist or is not writable, it returns `"KO"` and writes an error. If everything is in order, it appends a test entry and returns `"OK"`.
+
+This is useful for automated checks or pre-flight validations before starting logging operations.
+
+#### **Example**
+
+```powershell
+Test-ActivityLog -LogLocation "C:\Logs"
+```
+
+Returns `"OK"` if `C:\Logs\activity.log` exists and is writable, otherwise `"KO"`.
+
+---
+
 ## 🧪 Testing with Pester
 
 ```powershell
