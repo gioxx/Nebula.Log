@@ -73,11 +73,12 @@ function Write-Log {
     $formattedMessage | Out-Host
     if ($WriteToFile) {
         try {
-            Add-Content -Path $logFilePath -Value $formattedMessage
+            Add-Content -Path $logFilePath -Value $formattedMessage -ErrorAction Stop
         } catch {
             Write-Error "Failed to write to log file: $_"
+            throw  # Re-throw the exception to be caught by calling function
         }
-    }
+    }    
 }
 
 function Test-ActivityLog {
@@ -106,8 +107,7 @@ function Test-ActivityLog {
                 -Message "Test activity log message." -Level "INFO" `
                 -WriteToFile -ErrorAction Stop
             return "OK"
-        }
-        catch {
+        } catch {
             # Catch any error, including access denied
             Write-Error "Failed to write to activity log: $_"
             return "KO"
