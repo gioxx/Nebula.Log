@@ -10,9 +10,10 @@
 ## ✨ Features
 
 - Logging with levels: `INFO`, `SUCCESS`, `WARNING`, `DEBUG`, `ERROR`
-- Output to both console and log file
+- Output to both console and log file (you can also choose to output only on log file using `-WriteOnlyToFile` switch)
 - Auto-archives log file if it exceeds 512 KB
-- Includes alias `Log-Message`
+- You can test the logging setup using `Test-ActivityLog` function ([read more](#-test-activitylog-in-detail))
+- Includes alias `Log-Message` (to call `Write-Log` function)
 
 ---
 
@@ -28,10 +29,16 @@ Install-Module -Name Nebula.Log -Scope CurrentUser
 
 ## 🚀 Usage
 
-Basic example:
+Basic example (output to both console and log file):
 
 ```powershell
-Write-Log -LogLocation "C:\Logs" -Message "Starting script..." -Level "INFO" -WriteToFile
+Write-Log -LogLocation "C:\Logs" -Message "Starting script ..." -Level "INFO" -WriteToFile
+```
+
+Basic example (output to log file only):
+
+```powershell
+Write-Log -LogLocation "C:\Logs" -Message "Starting script ..." -Level "INFO" -WriteToFile -WriteOnlyToFile
 ```
 
 Testing the logging setup:
@@ -60,9 +67,12 @@ Test-ActivityLog -LogLocation <String> [-LogFileName <String>]
 - `LogFileName` (String, Optional)  
   The name of the log file. Defaults to `activity.log` if not specified.
 
+- `TryFix` (Switch, Optional)  
+  If the `activity.log` file is not writable, the function tries to rename the old file and create a new one where new log messages can be written.
+
 #### **Description**
 
-`Test-ActivityLog` checks whether the specified log file exists and is writable by the current user. If the file doesn't exist or is not writable, it returns `"KO"` and writes an error. If everything is in order, it appends a test entry and returns `"OK"`.
+`Test-ActivityLog` checks whether the specified log file exists and is writable by the current user. If the file doesn't exist or is not writable, it returns `"KO"` and writes an error. If everything is in order, it appends a test entry and returns `"OK"`. You can also use `TryFix` switch in case the file is not writable, to attempt an automatic _repair_.
 
 This is useful for automated checks or pre-flight validations before starting logging operations.
 
@@ -73,6 +83,12 @@ Test-ActivityLog -LogLocation "C:\Logs"
 ```
 
 Returns `"OK"` if `C:\Logs\activity.log` exists and is writable, otherwise `"KO"`.
+
+```powershell
+Test-ActivityLog -LogLocation "C:\Logs" -TryFix
+```
+
+Try renaming the old, damaged, non-writable file so that you can create a new one in which to keep track of new log messages.
 
 ---
 
