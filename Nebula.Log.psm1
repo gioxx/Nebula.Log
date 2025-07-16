@@ -15,9 +15,13 @@
     The log level (INFO, SUCCESS, WARNING, DEBUG, ERROR). Default is INFO.
 .PARAMETER WriteToFile
     If specified, the message will be written to the log file.
+.PARAMETER WriteOnlyToFile
+    If specified, the message will be written only to the log file and not outputted to the console.
 .EXAMPLE
     Write-Log -LogLocation "C:\Logs" -Message "Hello, world!" -Level "INFO" -WriteToFile
     Write-Log -LogLocation "C:\Logs" -Message "An error occurred" -Level "ERROR" -WriteToFile
+
+    Write-Log -LogLocation "C:\Logs" -Message "Hello, world!" -Level "INFO" -WriteToFile -WriteOnlyToFile
     
     Test-ActivityLog -LogLocation "C:\Logs" -LogFileName "activity.log"
     This will log messages to the specified log file and console, and test if the logging functionality works correctly.
@@ -25,6 +29,7 @@
     Author: Giovanni Solone
 
     Modification History:
+    - 2025/07/16:   Added WriteOnlyToFile switch to allow writing to the log file without outputting to the console.
     - 2025/05/28:   Added Test-ActivityLog function to test logging functionality.
     - 2025/05/20:   Added check for log file size (512KB) and archive it with a timestamp if exceeded.
                     Changed function name to Write-Log and set alias Log-Message for backward compatibility.
@@ -35,11 +40,12 @@
 
 function Write-Log {
     param (
-        [string]$LogLocation,
-        [string]$Message,
-        [string]$LogFileName,
-        [ValidateSet("INFO", "SUCCESS", "WARNING", "DEBUG", "ERROR")]$Level = "INFO",
-        [switch]$WriteToFile
+        [string] $LogLocation,
+        [string] $Message,
+        [string] $LogFileName,
+        [ValidateSet("INFO", "SUCCESS", "WARNING", "DEBUG", "ERROR")] $Level = "INFO",
+        [switch] $WriteToFile,
+        [switch] $WriteOnlyToFile
     )
 
     # Set default filename if not specified
@@ -70,7 +76,11 @@ function Write-Log {
     }
 
     $formattedMessage = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$Level] $Message"
-    $formattedMessage | Out-Host
+    
+    if (-not ($WriteOnlyToFile)) {
+        $formattedMessage | Out-Host
+    }
+    
     if ($WriteToFile) {
         try {
             Add-Content -Path $logFilePath -Value $formattedMessage -ErrorAction Stop
@@ -83,8 +93,9 @@ function Write-Log {
 
 function Test-ActivityLog {
     param (
-        [string]$LogLocation,
-        [string]$LogFileName
+        [string] $LogLocation,
+        [string] $LogFileName,
+        [switch] $TryFix
     )
 
     # Set default filename if not specified
@@ -100,20 +111,39 @@ function Test-ActivityLog {
 
     $logFilePath = Join-Path $LogLocation $LogFileName
 
-    if (Test-Path $logFilePath) {
-        try {
-            # Attempt to write a test message to the log file
-            Log-Message -LogLocation $LogLocation -LogFileName $LogFileName `
-                -Message "Test activity log message." -Level "INFO" `
-                -WriteToFile -ErrorAction Stop
-            return "OK"
-        } catch {
-            # Catch any error, including access denied
-            Write-Error "Failed to write to activity log: $_"
-            return "KO"
-        }
-    } else {
+    if (-not (Test-Path $logFilePath)) {
         Write-Error "Log file does not exist: $logFilePath"
+        return "KO"
+    }
+
+    try {
+        # Try logging a test message
+        Log-Message -LogLocation $LogLocation -LogFileName $LogFileName `
+            -Message "Test activity log message." -Level "INFO" `
+            -WriteToFile -ErrorAction Stop
+        return "OK"
+    } catch {
+        Write-Warning "Initial log write failed: $_"
+
+        if ($TryFix) {
+            Write-Warning "Attempting to fix log file..."
+            try {
+                $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+                $archivedLog = Join-Path $LogLocation "$($LogFileName).unwritable.$timestamp.bak"
+                Rename-Item -Path $logFilePath -NewName $archivedLog -Force
+                Write-Warning "Log file renamed to: $archivedLog"
+
+                # Attempt to log again
+                Log-Message -LogLocation $LogLocation -LogFileName $LogFileName `
+                    -Message "Test activity log message after fix." -Level "INFO" `
+                    -WriteToFile -ErrorAction Stop
+                return "OK"
+            } catch {
+                Write-Error "Auto-fix failed: $_"
+                return "KO"
+            }
+        }
+
         return "KO"
     }
 }

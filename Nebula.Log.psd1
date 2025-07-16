@@ -1,6 +1,6 @@
 @{
     RootModule        = 'Nebula.Log.psm1'
-    ModuleVersion     = '1.0.5'
+    ModuleVersion     = '1.0.6'
     GUID              = '4777f87e-f3fd-4404-bc3a-c724e6c12552'
     Author            = 'Giovanni Solone'
     Description       = 'Structured logging module for PowerShell scripts. Supports multiple log levels and file rotation.'
@@ -24,8 +24,8 @@
             Icon            = 'icon.png'
             Readme          = 'README.md'
             ReleaseNotes    = @'
-- Fixed issue with Test-ActivityLog function not writing to the log file.
-- Re-throw the exception to be caught by calling function in Write-Log.
+- From now, you can use -TryFix parameter to attempt to fix unwritable log files in Test-ActivityLog.
+- Added WriteOnlyToFile switch to allow writing to the log file without outputting to the console.
 '@
         }
     }
