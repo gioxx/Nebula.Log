@@ -117,6 +117,12 @@ Install-Module -Name Nebula.Log -Scope CurrentUser -Force
 
 ---
 
+## 📄 License
+
+All scripts in this repository are licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
 ## 🔧 Development
 
 This module is part of the [Nebula](https://github.com/gioxx?tab=repositories&q=Nebula) PowerShell tools family.
@@ -125,6 +131,7 @@ Feel free to fork, improve and submit pull requests.
 
 ---
 
-## 📄 License
+## 📬 Feedback and Contributions
 
-Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+Feedback, suggestions, and pull requests are welcome!  
+Feel free to [open an issue](https://github.com/gioxx/Nebula.Log/issues) or contribute directly.
