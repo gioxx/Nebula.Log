@@ -2,10 +2,10 @@ function Resolve-LogLocation {
     <#
     .SYNOPSIS
         Resolve the effective log directory and optionally create it.
-    .PARAMETER LogLocation
-        Candidate directory. If empty, try caller script directory, else current directory.
-    .PARAMETER EnsureExists
-        Create the directory if it doesn't exist.
+    .DESCRIPTION
+        If LogLocation is not provided, this inspects the call stack and returns the first
+        caller script directory that is OUTSIDE of the module root. If none is found
+        (e.g., interactive console), it falls back to the current location.
     #>
     [CmdletBinding()]
     param(
@@ -13,34 +13,40 @@ function Resolve-LogLocation {
         [switch] $EnsureExists
     )
 
-    # If provided explicitly, use it.
+    # Use explicit path if provided
     if ($LogLocation -and $LogLocation.Trim()) {
         $target = $LogLocation
     } else {
-        # Try to detect the caller script path from the call stack (first frame with a ScriptName != this module).
-        $modulePath = $PSCommandPath
+        # Try to infer from call stack, skipping frames that belong to this module
+        # $script:ModuleRoot is set in Nebula.Log.psm1 before dot-sourcing Private/
+        $moduleRoot = $script:ModuleRoot
         $callerScript = $null
+
         try {
             $frames = Get-PSCallStack 2>$null
             if ($frames) {
                 foreach ($f in $frames) {
-                    if ($f.InvocationInfo -and $f.InvocationInfo.ScriptName) {
-                        $sn = $f.InvocationInfo.ScriptName
-                        if ($sn -and $sn -ne $modulePath) {
-                            $callerScript = $sn
+                    $sn = $f.InvocationInfo.ScriptName
+                    if (-not [string]::IsNullOrWhiteSpace($sn)) {
+                        # Normalize both paths for robust comparison
+                        $snFull = [IO.Path]::GetFullPath($sn)
+                        $isInsideModule = ($moduleRoot -and ( [IO.Path]::GetFullPath($moduleRoot).TrimEnd('\', '/') -and $snFull.StartsWith([IO.Path]::GetFullPath($moduleRoot), $true, [Globalization.CultureInfo]::InvariantCulture) ))
+
+                        if (-not $isInsideModule) {
+                            $callerScript = $snFull
                             break
                         }
                     }
                 }
             }
         } catch {
-            # No action; we'll fall back below.
+            # ignore and fall back
         }
 
         if ($callerScript) {
             $target = Split-Path -Path $callerScript -Parent
         } else {
-            # As a last resort, use the current file system location.
+            # 3) Fallback: current working directory
             $target = (Get-Location).Path
         }
     }
